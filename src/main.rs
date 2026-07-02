@@ -10,6 +10,7 @@ fn main() {
         Some("init") => commands::init::run(),
         Some("add") => commands::add::run(&args),
         Some("diff") => commands::show_diff::run(),
+        Some("write-tree") => commands::write_tree::run(),
         _ => {
             eprintln!("usage: depot <command>");
             eprintln!("commands: init, add, write-tree, commit-tree");
