@@ -34,22 +34,8 @@ pub fn build_sha1_path(sha1: &[u8; 20]) -> String {
     unsafe { String::from_utf8_unchecked(buf) }
 }
 
-pub fn create_blob(file: File, metadata: Metadata) -> Result<[u8; 20], std::io::Error>{
-    let file_len = metadata.len() as usize;
-    let mmap;
-    let content: &[u8];
-    if file_len == 0 {
-        content = &[];
-    } else {
-        mmap = unsafe { Mmap::map(&file) }?;
-        content = &mmap;
-    }
-    drop(file);
-
-    let header = format!("blob {}\0", file_len);
-
-    let mut encoder = ZlibEncoder::new(Vec::with_capacity(header.len() + file_len + 200), Compression::best());
-    encoder.write_all(header.as_bytes())?;
+pub fn write_sha1_file(content: &Vec<u8>) -> Result<[u8; 20], std::io::Error> {
+    let mut encoder = ZlibEncoder::new(Vec::with_capacity(content.len() + 200), Compression::best());
     encoder.write_all(&content)?;
     let compressed = encoder.finish()?;
 
@@ -64,11 +50,25 @@ pub fn create_blob(file: File, metadata: Metadata) -> Result<[u8; 20], std::io::
                 f.write_all(&compressed)?},
             Err(e) if e.kind() == io::ErrorKind::AlreadyExists => (),
             Err(e) => {
-                eprintln!("Unexpected error when creating blob file: {}", e);
-                return Err(e);
+                eprintln!("Unexpected error when creating sha1 file: {}", e);
             }
         }
-    print!("{}", &path);
+    Ok(sha1)
+}
+
+pub fn create_blob(file: File, metadata: Metadata) -> Result<[u8; 20], std::io::Error>{
+    let file_len = metadata.len() as usize;
+    let mmap;
+    let mut content: Vec<u8>;
+    if file_len == 0 {
+        content = Vec::new();
+    } else {
+        mmap = unsafe { Mmap::map(&file) }?;
+        content = format!("blob {}\0", file_len).into();
+        content.extend_from_slice(&mmap);
+    }
+    drop(file);
+    let sha1 = write_sha1_file(&content)?;
     Ok(sha1)
 }
 
