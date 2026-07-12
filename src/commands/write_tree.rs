@@ -31,7 +31,7 @@ pub fn run() {
     };
 
     let mut offset: usize = 40;
-    let mut buffer = vec![0u8; offset];
+    let mut buffer = vec![0u8; offset+1];
     
     for entry in active_cache {
         match check_valid_sha1(&entry.sha1) {
@@ -45,13 +45,15 @@ pub fn run() {
                 std::process::exit(1);
             }
         }
-        buffer.extend_from_slice(&entry.size.to_be_bytes());
+        buffer.extend_from_slice(&entry.size.to_string().as_bytes());
+        buffer.push(b' ');
         buffer.extend_from_slice(entry.name.as_bytes());
         buffer.push(b'\0');
+        buffer.extend_from_slice(&entry.sha1);
     }
     let tree_size = buffer.len() - offset;
     offset = prepend_integer(&mut buffer, tree_size, offset);
-    buffer.splice(0..offset-1, b"tree".to_vec());
+    buffer.splice(0..offset, b"tree ".to_vec());
     let sha1 = match write_sha1_file(&buffer){
             Ok(sha) => sha,
             Err(e) => {

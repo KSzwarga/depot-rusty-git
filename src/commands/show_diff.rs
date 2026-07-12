@@ -7,16 +7,22 @@ const MODIFIED: i8 = 1 << 0;
 const CREATED: i8 = 1 << 1;
 const SIZE: i8 = 1 << 2;
 
-fn read_sha1_file(sha1: &[u8; 20]) -> Result<String, Box<dyn std::error::Error>>  {
+pub fn read_sha1_file(sha1: &[u8; 20], object_type: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>>  {
     let filename = build_sha1_path(sha1);
     let file = File::open(&filename)?;
     let _metadata = &file.metadata()?;
     let decoder = ZlibDecoder::new(file);
     let mut reader = BufReader::new(decoder);
-    let _ = reader.read_until(b'\0', &mut Vec::new())?;
-    let mut s = String::new();
-    reader.read_to_string(&mut s)?;
-    Ok(s)
+    let mut check: Vec<u8> = Vec::new();
+    reader.read_until(b' ',  &mut check)?;
+    check.pop();
+    if check != object_type.as_bytes() {
+        return Err(format!("object type is not {:?}", object_type).into());
+    }
+    reader.read_until(b'\0',&mut Vec::new())?;
+    let mut buf = Vec::new();
+    reader.read_to_end(&mut buf)?;
+    Ok(buf)
 }
 
 fn diff_metadata(ce: &CacheEntry, old_metadata: &Metadata) -> i8 {
@@ -64,13 +70,14 @@ pub fn run() {
             continue;
         }
 
-        let old_file = match read_sha1_file(&ce.sha1){
+        let old_file = match read_sha1_file(&ce.sha1, "blob"){
             Ok(m) => m,
             Err(e) => {
                 eprintln!("Unexpected error on reading old file:{}, error: {}", path, e);
                 continue;
             },
         };
+        let old_file_str = String::from_utf8_lossy(&old_file).into_owned();
         let new_file = match std::fs::read_to_string(path) {
             Ok(m) => m,
             Err(e) => {
@@ -78,7 +85,7 @@ pub fn run() {
                 continue;
             },
         };
-        TextDiff::from_lines(&old_file, &new_file)
+        TextDiff::from_lines(&old_file_str, &new_file)
             .unified_diff()
             .to_writer(&mut out)
             .unwrap();

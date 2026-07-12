@@ -20,7 +20,6 @@ pub fn build_sha1_path(sha1: &[u8; 20]) -> String {
     let capacity = DB_ENVIRONMENT.len() + 41;
     let mut buf = Vec::with_capacity(capacity);
 
-
     buf.extend_from_slice(DB_ENVIRONMENT.as_bytes());
     buf.push(HEX[(sha1[0] >> 4) as usize]);
     buf.push(HEX[(sha1[0] & 0xf) as usize]);
@@ -31,7 +30,7 @@ pub fn build_sha1_path(sha1: &[u8; 20]) -> String {
         buf.push(HEX[(byte & 0xf) as usize]);
     }
 
-    unsafe { String::from_utf8_unchecked(buf) }
+    String::from_utf8_lossy(&buf).into_owned()
 }
 
 pub fn write_sha1_file(content: &Vec<u8>) -> Result<[u8; 20], std::io::Error> {
