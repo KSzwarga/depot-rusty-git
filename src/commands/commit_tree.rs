@@ -1,6 +1,3 @@
-use flate2::write::ZlibEncoder;
-use sha1::digest::typenum::Len;
-
 use crate::{commands::{add::{build_sha1_path, write_sha1_file}, read_tree::hex_to_sha1, write_tree::prepend_integer}, constants::{AUTHOR_EMAIL, AUTHOR_NAME, AUTHOR_SURNAME, COMMITER_EMAIL, COMMITER_NAME, COMMITER_SURNAME}};
 
 pub fn run(args: &[String]){
