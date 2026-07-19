@@ -62,7 +62,7 @@ pub fn create_blob(file: File, metadata: Metadata) -> Result<[u8; 20], std::io::
     if file_len == 0 {
         content = Vec::new();
     } else {
-        mmap = unsafe { Mmap::map(&file) }?;//f
+        mmap = unsafe { Mmap::map(&file) }?;
         content = format!("blob {}\0", file_len).into();
         content.extend_from_slice(&mmap);
     }
