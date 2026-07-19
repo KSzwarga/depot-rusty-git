@@ -53,7 +53,6 @@ pub fn read_cache() -> Result<Vec<CacheEntry>, Box<dyn Error>>{
             name: String::from_utf8(mmap[curr_entry+62..curr_entry+62+namelen].to_vec())?,
         };
         curr_entry += 62+namelen;
-        println!("{:?}", ce);
         active_cache.push(ce);
         
     }

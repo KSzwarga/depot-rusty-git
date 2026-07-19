@@ -5,7 +5,7 @@ mod constants;
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let command = args.get(1).map(String::as_str);
-
+    
     match command {
         Some("init") => commands::init::run(),
         Some("add") => commands::add::run(&args),

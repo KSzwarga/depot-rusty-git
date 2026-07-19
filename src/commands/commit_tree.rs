@@ -45,7 +45,7 @@ pub fn run(args: &[String]){
 
 
     match write_sha1_file(&buffer){
-        Ok(sha) => println!("tree written to: {:?}", build_sha1_path(&sha)),
+        Ok(sha) => println!("Commit object written to: {:?}", build_sha1_path(&sha)),
         Err(e) => {
             eprintln!("Error checking write_sha1_file for commit: {}", e);
             std::process::exit(1);
