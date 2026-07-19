@@ -1,4 +1,4 @@
-use std::io::{BufRead, BufReader, Read};
+use std::io::{BufRead, BufReader, Error, ErrorKind, Read};
 
 use crate::commands::show_diff::read_sha1_file;
 use crate::constants::HEX;
@@ -19,15 +19,21 @@ fn read_tree(sha1: &[u8; 20]) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
      Ok(tree_contents)
 }
 
-pub fn hex_to_sha1(hex: &str) -> Result<[u8; 20], std::num::ParseIntError> {
+pub fn hex_to_sha1(hex: &str) -> Result<[u8; 20], Error> {
+    if hex.len() != 40 {
+        return Err(Error::new(
+            ErrorKind::InvalidInput,
+            format!("expected 40 hex characters, got {}", hex.len()),
+        ));
+    }
     let mut sha1 = [0u8; 20];
     for (i, byte) in (0..40)
         .step_by(2)
         .map(|i| u8::from_str_radix(&hex[i..i + 2], 16))
         .enumerate()
-        {
-            sha1[i] = byte?;
-        }
+    {
+        sha1[i] = byte.map_err(|e| Error::new(ErrorKind::InvalidInput, e))?;
+    }
     Ok(sha1)
 }
 

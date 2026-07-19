@@ -6,7 +6,7 @@ fn check_valid_sha1(sha1: &[u8; 20]) -> Result<bool, Error>{
     exists(path)
 }
 
-fn prepend_integer(buf: &mut Vec<u8>, mut tree_size: usize, mut offset: usize) -> usize {
+pub fn prepend_integer(buf: &mut Vec<u8>, mut tree_size: usize, mut offset: usize) -> usize {
     if tree_size == 0 {
         offset -= 1;
         buf[offset] = b'0';

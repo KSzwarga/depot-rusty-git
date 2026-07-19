@@ -12,9 +12,10 @@ fn main() {
         Some("diff") => commands::show_diff::run(),
         Some("write-tree") => commands::write_tree::run(),
         Some("read-tree") => commands::read_tree::run(&args),
+        Some("commit-tree")=> commands::commit_tree::run(&args),
         _ => {
             eprintln!("usage: depot <command>");
-            eprintln!("commands: init, add, write-tree, read-tree, commit-tree");
+            eprintln!("commands: init, add, diff, write-tree, read-tree, commit-tree");
             std::process::exit(1);
         }
 
