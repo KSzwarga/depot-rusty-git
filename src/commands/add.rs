@@ -23,7 +23,7 @@ pub fn build_sha1_path(sha1: &[u8; 20]) -> String {
     buf.extend_from_slice(DB_ENVIRONMENT.as_bytes());
     buf.push(HEX[(sha1[0] >> 4) as usize]);
     buf.push(HEX[(sha1[0] & 0xf) as usize]);
-    buf.push(b'\\'); 
+    buf.push(b'/'); 
 
     for &byte in &sha1[1..20] {
         buf.push(HEX[(byte >> 4) as usize]);
